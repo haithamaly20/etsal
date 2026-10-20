@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>إدارة وتوحيد جهات الاتصال v2</title>
+<style>
+body{margin:0;font-family:system-ui,Tahoma,sans-serif;background:#f6f7f9;color:#1d2530;font-size:14px}
+header{background:#fff;border-bottom:1px solid #e2e6ec;padding:12px 16px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+h1{font-size:17px;margin:0 auto 0 0}
+main{padding:14px 16px;max-width:1280px;margin:auto}
+button,select,input{font:inherit;padding:6px 10px;border:1px solid #d5dbe3;border-radius:7px;background:#fff;color:inherit}
+button{background:#2563eb;color:#fff;border-color:transparent;cursor:pointer}
+button:disabled{opacity:.4;cursor:default}
+button.g{background:#fff;color:#2563eb;border-color:#d5dbe3}
+button.d{background:#dc2626}
+.bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;align-items:center}
+.bar input[type=search]{flex:1;min-width:200px}
+.bulk{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px;background:#eff6ff;border-radius:8px;padding:6px 10px}
+.stats{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.stat{background:#fff;border:1px solid #e2e6ec;border-radius:9px;padding:6px 12px}
+.stat b{font-size:18px;display:block}
+.stat span{color:#6b7585;font-size:12px}
+.layout{display:grid;grid-template-columns:1fr 360px;gap:12px}
+@media(max-width:820px){.layout{grid-template-columns:1fr}}
+.wrap{background:#fff;border:1px solid #e2e6ec;border-radius:10px;overflow:auto;max-height:72vh}
+table{border-collapse:collapse;width:100%;min-width:480px}
+th,td{padding:7px 9px;border-bottom:1px solid #eef1f5;text-align:right}
+th{background:#f6f7f9;color:#6b7585;font-size:12px;position:sticky;top:0}
+tr.row{cursor:pointer}
+tr.row:hover{background:#f0f9ff}
+tr.on{background:#e0f2fe}
+.tag{font-size:11px;padding:2px 8px;border-radius:99px;border:1px solid;white-space:nowrap}
+.dup{color:#b45309;border-color:#b45309}
+.fuzzy{color:#2563eb;border-color:#2563eb}
+.order{color:#7c3aed;border-color:#7c3aed}
+.unique{color:#15803d;border-color:#15803d}
+.empty{color:#6b7585;border-color:#c0c6cf}
+#editor{background:#fff;border:1px solid #e2e6ec;border-radius:10px;padding:12px;align-self:start;position:sticky;top:10px;max-height:80vh;overflow:auto}
+.fields{display:grid;gap:8px}
+.fields label{display:grid;gap:3px;color:#6b7585;font-size:12px}
+.fields input{color:#1d2530;font-size:14px;width:100%;box-sizing:border-box}
+.btns{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.hint{color:#6b7585;font-size:12px}
+.warn{color:#b45309;font-size:13px;margin:6px 0}
+.av{width:28px;height:28px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-left:6px}
+.big{width:96px;height:96px;border-radius:50%;object-fit:cover;display:block;margin:0 auto 8px}
+.view{display:grid;grid-template-columns:max-content 1fr;gap:6px 12px;margin:8px 0}
+.view dt{color:#6b7585}
+.view dd{margin:0;word-break:break-word}
+.sim{padding:6px 0;border-bottom:1px solid #eef1f5}
+tr.diff td{background:#fff7ed}
+#drop{display:none;position:fixed;inset:0;background:rgba(37,99,235,.15);border:3px dashed #2563eb;z-index:9;align-items:center;justify-content:center;font-size:20px;pointer-events:none}
+#drop.on{display:flex}
+
+/* Windows 11 Fluent + iPadOS-inspired visual refresh (presentation only) */
+:root{color-scheme:light;--accent:#2563eb;--ink:#202633;--muted:#697586;--line:rgba(115,130,150,.20);--surface:rgba(255,255,255,.82);--surface2:#f5f7fb;--shadow:0 8px 28px rgba(35,50,75,.08)}
+*{box-sizing:border-box}
+body{font-family:"Segoe UI Variable","Segoe UI",system-ui,Tahoma,sans-serif;background:radial-gradient(ellipse at 12% 0%,#e4efff 0,transparent 38%),radial-gradient(ellipse at 95% 12%,#e8e9ff 0,transparent 32%),#f3f6fb;color:var(--ink);font-size:14px;min-height:100vh}
+header{position:sticky;top:0;z-index:5;background:rgba(250,252,255,.82);backdrop-filter:blur(24px) saturate(160%);-webkit-backdrop-filter:blur(24px) saturate(160%);border-bottom:1px solid rgba(120,140,165,.22);padding:13px clamp(12px,2vw,28px);gap:9px;box-shadow:0 3px 16px rgba(25,45,75,.04)}
+h1{font-size:20px;font-weight:650;letter-spacing:-.35px;margin:0 auto 0 0}
+main{padding:22px clamp(12px,2vw,28px) 34px;max-width:1600px}
+button,select,input{font-family:inherit;font-size:14px;padding:9px 12px;border:1px solid rgba(125,140,160,.32);border-radius:11px;background:rgba(255,255,255,.9);color:inherit;box-shadow:0 1px 2px rgba(25,40,60,.025);transition:background .18s,border-color .18s,box-shadow .18s,transform .18s}
+button{background:linear-gradient(180deg,#3679ef,#2161d7);color:#fff;border:1px solid #2866d9;font-weight:600;box-shadow:0 3px 8px rgba(37,99,235,.16)}
+button:hover{filter:brightness(1.035);box-shadow:0 5px 14px rgba(37,99,235,.18);transform:translateY(-1px)}
+button:active{transform:scale(.98)}
+button:disabled{opacity:.42;cursor:default;transform:none;box-shadow:none}
+button.g{background:rgba(255,255,255,.78);color:#26374e;border-color:rgba(125,140,160,.28);box-shadow:0 1px 3px rgba(25,40,60,.04)}
+button.g:hover{background:#fff;border-color:#9bb9ed}
+button.d{background:linear-gradient(180deg,#ef6262,#d92e3d);border-color:#d92e3d;color:#fff}
+header button{display:inline-flex;align-items:center;gap:8px;min-height:40px;border-radius:13px;padding:8px 12px}
+header button::before{content:"";display:inline-grid;place-items:center;width:25px;height:25px;border-radius:8px;background:rgba(255,255,255,.22);font-size:15px;line-height:1}
+header button.g::before{background:linear-gradient(145deg,#e9f1ff,#d8e6ff);box-shadow:inset 0 0 0 1px rgba(70,110,190,.08)}
+header button:nth-of-type(1)::before{content:"📥"}
+header button:nth-of-type(2)::before{content:"↶"}
+header button:nth-of-type(3)::before{content:"↷"}
+header button:nth-of-type(4)::before{content:"📤"}
+header button:nth-of-type(5)::before{content:"🪪"}
+header button:nth-of-type(6)::before{content:"💾"}
+header button:nth-of-type(7)::before{content:"📂"}
+header button:nth-of-type(8)::before{content:"⏱"}
+header button:nth-of-type(9)::before{content:"＋";font-weight:700}
+.bar{gap:10px;margin-bottom:13px;align-items:end;padding:14px;background:rgba(255,255,255,.62);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);backdrop-filter:blur(16px)}
+.bar label{display:grid;gap:5px;color:var(--muted);font-size:12px;font-weight:600}
+.bar input[type=search]{min-width:190px;min-height:40px;background:#fff}
+.bar select,.bar input{min-height:40px}
+.bulk{background:rgba(224,237,255,.72);border:1px solid rgba(105,150,220,.2);border-radius:16px;padding:11px 13px;margin-bottom:14px;gap:9px}
+.stats{gap:12px;margin-bottom:16px}
+.stat{flex:1 1 125px;min-width:105px;background:var(--surface);border:1px solid var(--line);border-radius:17px;padding:14px 16px;box-shadow:var(--shadow);backdrop-filter:blur(14px);position:relative;overflow:hidden}
+.stat::after{content:"";position:absolute;inset-inline-start:0;top:0;bottom:0;width:4px;background:linear-gradient(#70a6ff,#8b8bf8);border-radius:4px}
+.stat b{font-size:25px;letter-spacing:-.6px;line-height:1.35;font-weight:700}
+.stat span{font-size:12px;color:var(--muted)}
+.layout{grid-template-columns:minmax(0,1fr) minmax(290px,350px);gap:16px;align-items:start}
+.wrap,#editor{background:var(--surface);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+.wrap{max-height:calc(100vh - 300px);min-height:300px;scrollbar-width:thin;scrollbar-color:#c4d0e1 transparent}
+table{min-width:560px}
+th,td{padding:12px 13px;border-bottom:1px solid rgba(130,145,165,.14)}
+th{background:rgba(242,246,252,.94);color:#526176;font-weight:650;padding-top:14px;padding-bottom:14px}
+tr.row{transition:background .15s}
+tr.row:hover{background:rgba(219,235,255,.56)}
+tr.on{background:rgba(204,228,255,.76)}
+tr.diff td{background:#fff4e5}
+.tag{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:650;padding:4px 9px;border-radius:999px;background:rgba(255,255,255,.7)}
+#editor{padding:18px;top:84px;max-height:calc(100vh - 110px);border-radius:20px}
+#editor h3{font-size:18px;font-weight:700;letter-spacing:-.2px}
+.fields{gap:12px}
+.fields label{gap:6px;font-size:12px;font-weight:600;color:#5d6a7c}
+.fields input{min-height:40px;border-radius:11px;background:rgba(255,255,255,.92)}
+.btns{gap:8px}
+.hint{color:#718096;line-height:1.7}
+.warn{background:#fff6e8;border:1px solid #f5d6a4;border-radius:10px;padding:9px 11px}
+.av{width:32px;height:32px;border-radius:11px;object-fit:cover;vertical-align:middle;margin-left:8px;box-shadow:0 2px 5px #00000012}
+.big{width:104px;height:104px;border:4px solid white;box-shadow:0 5px 20px #22334a20}
+.view{gap:8px 14px;line-height:1.6}
+.sim{padding:10px 0;border-bottom:1px solid var(--line)}
+dialog{background:rgba(250,252,255,.97);color:var(--ink);box-shadow:0 24px 80px rgba(20,35,60,.25);backdrop-filter:blur(22px)}
+dialog::backdrop{background:rgba(24,37,58,.28);backdrop-filter:blur(4px)}
+#drop{background:rgba(225,238,255,.86);backdrop-filter:blur(10px);border-color:#3679ef;color:#1e4f9e;font-weight:700}
+input[type=checkbox]{accent-color:#2563eb;width:17px;height:17px;vertical-align:middle}
+select:focus,input:focus,button:focus-visible{outline:3px solid rgba(59,130,246,.22);outline-offset:1px;border-color:#6b9af0}
+@media(max-width:1000px){.layout{grid-template-columns:1fr}#editor{position:relative;top:auto;max-height:none;order:-1}.wrap{max-height:65vh}header{position:relative}h1{width:100%;margin:0 0 5px}}
+@media(max-width:600px){body{font-size:14px}header{padding:12px;gap:7px}h1{font-size:19px}header button{flex:1 1 calc(50% - 8px);justify-content:flex-start;padding:7px 9px;font-size:12px}main{padding:12px}.bar{padding:11px;border-radius:15px}.bar label{flex:1 1 42%}.bar input[type=search]{flex:1 1 100%;min-width:0;order:-1}.bar select{max-width:100%;min-width:0}.bulk{align-items:stretch}.bulk button{flex:1 1 42%}.stat{padding:11px 12px;flex-basis:calc(50% - 12px)}.stat b{font-size:22px}.layout{gap:12px}.wrap,#editor{border-radius:16px}#editor{padding:14px}table{min-width:560px}th,td{padding:10px 9px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;scroll-behavior:auto!important}}
+
+</style>
+</head>
+<body>
+<header>
+  <h1>إدارة وتوحيد جهات الاتصال</h1>
+  <button class="g" type="button" onclick="$('importFile').click()">استيراد CSV / VCF</button>
+  <input type="file" id="importFile" accept=".csv,.vcf,text/csv,text/vcard" hidden>
+  <button class="g" type="button" id="undoBtn" onclick="undo()" disabled>تراجع</button>
+  <button class="g" type="button" id="redoBtn" onclick="redo()" disabled>إعادة</button>
+  <select id="fmt">
+    <option value="ours">CSV كامل (الأعمدة الأصلية)</option>
+    <option value="google">CSV متوافق مع Google Contacts</option>
+    <option value="outlook">CSV متوافق مع Outlook</option>
+  </select>
+  <button class="g" type="button" onclick="exportCSV()">تصدير CSV</button>
+  <button class="g" type="button" onclick="exportVCF()">تصدير VCF</button>
+  <button class="g" type="button" onclick="backupFile()">نسخة احتياطية</button>
+  <button class="g" type="button" onclick="$('restoreFile').click()">استعادة نسخة</button>
+  <input type="file" id="restoreFile" accept=".json,application/json" hidden>
+  <button class="g" type="button" onclick="restoreAuto()">آخر نسخة تلقائية</button>
+  <button type="button" onclick="addNew()">إضافة جديد</button>
+</header>
+
+<main>
+  <div class="bar">
+    <label>عمود الاسم: <select id="nameSel"></select></label>
+    <label>رمز الدولة: <input id="cc" value="20" size="4" dir="ltr"></label>
+    <input type="search" id="search" placeholder="ابحث بأي صيغة (احمد، فاطمه، رقم...)">
+    <select id="sortSel" title="ترتيب">
+      <option value="name_asc">الاسم (أ ← ي)</option>
+      <option value="name_desc">الاسم (ي ← أ)</option>
+      <option value="newest">الأحدث أولًا</option>
+      <option value="oldest">الأقدم أولًا</option>
+      <option value="phone">رقم الهاتف</option>
+      <option value="dup">المكرر أولًا</option>
+    </select>
+    <select id="groupFilter" title="المجموعة"></select>
+    <select id="filter">
+      <option value="all">الكل</option>
+      <option value="dup">مكرر محتمل</option>
+      <option value="fuzzy">تشابه إملائي</option>
+      <option value="order">ترتيب كلمات مختلف</option>
+      <option value="unique">فريد</option>
+    </select>
+  </div>
+  <div class="bulk">
+    <span>المحدد: <b id="selCount">0</b></span>
+    <button type="button" onclick="mergeSelected()">دمج المحدد</button>
+    <button type="button" class="d" onclick="deleteSelected()">حذف المحدد</button>
+    <button type="button" class="g" onclick="groupBulk(true)">إضافة للمجموعة</button>
+    <button type="button" class="g" onclick="groupBulk(false)">إزالة من مجموعة</button>
+    <span class="hint">حدد الصفوف بالمربعات، أو استخدم مربع "الكل" لتحديد القائمة المعروضة.</span>
+  </div>
+  <p class="hint">التعديلات تُحفظ تلقائيًا في متصفحك، لكن صدّر نسخة من الملف بين وقت وآخر. الدمج لا يتم إلا بضغطك أنت، والحقول المتعارضة تُحفظ في الملاحظات.</p>
+  <p id="storeWarn" class="warn" hidden>تعذّر الحفظ التلقائي في المتصفح (ربما امتلأت المساحة). صدّر ملف CSV الآن حتى لا تضيع التعديلات.</p>
+  <p id="fuzzyBusy" class="hint" hidden>جارٍ حساب التشابه الإملائي في الخلفية، والواجهة تعمل بشكل طبيعي.</p>
+  <p id="fuzzyWarn" class="warn" hidden>التشابه الإملائي متوقف لأن عدد الأسماء المختلفة تجاوز 10000. التكرار بالاسم المطابق والرقم ما زال يعمل.</p>
+
+  <div class="stats" id="stats"></div>
+
+  <div class="layout">
+    <div class="wrap">
+      <table>
+        <thead><tr><th><input type="checkbox" id="selAll"></th><th>الاسم</th><th>الحالة</th><th>الاسم المعتمد</th><th>الهاتف</th></tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+    <aside id="editor"></aside>
+  </div>
+</main>
+<dialog id="mergeDlg" style="max-width:520px;width:92%;border:1px solid #d5dbe3;border-radius:12px;padding:16px">
+  <h3 style="margin:0 0 8px">معاينة الدمج قبل التنفيذ</h3>
+  <div id="mergeBody"></div>
+  <label style="display:flex;gap:6px;margin:10px 0"><input type="checkbox" id="mergeAck"> أؤكد أن هذه السجلات لشخص واحد</label>
+  <div class="btns"><button type="button" class="g" onclick="$('mergeDlg').close()">إلغاء</button><button type="button" id="mergeOk" onclick="confirmMerge()">تنفيذ الدمج</button></div>
+</dialog>
+<dialog id="cmpDlg" style="max-width:780px;width:94%;border:1px solid #d5dbe3;border-radius:12px;padding:16px">
+  <h3 style="margin:0 0 8px">مقارنة جهتي اتصال</h3>
+  <div id="cmpBody"></div>
+  <div class="btns"><button type="button" class="g" onclick="$('cmpDlg').close()">إغلاق</button><button type="button" onclick="mergeFromCompare()">دمج الاثنين</button></div>
+</dialog>
+<div id="drop">أفلت الملف هنا</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const RE = {
+  name: /^(name|full name|display name)$/i, nameAr: /^(الاسم|اسم|الاسم الكامل)$/,
+  phone: /phone|tel|هاتف|جوال|موبايل|محمول/i, email: /email|mail|بريد/i,
+  org: /org|company|شركة|جهة/i, title: /title|job|وظيف|مسمى/i,
+  bday: /birth|bday|ميلاد/i, addr: /address|adr|عنوان/i, note: /note|ملاحظ/i
+};
+const STATUS_AR = {dup: 'مكرر محتمل', fuzzy: 'تشابه إملائي', order: 'ترتيب كلمات مختلف', unique: 'فريد', empty: 'بدون اسم'};
+const DEFAULT_COLS = ['Name', 'Organization', 'Title', 'Phone 1', 'Email 1', 'Birthday', 'Address', 'Note'];
+const LS = 'contacts-manager-v2';
+
+let contacts = [], cols = [...DEFAULT_COLS], nameKey = 'Name', current = null, COUNTRY = '20';
+let groups = new Map(), phoneGroups = new Map(), fuzzy = new Map(), choice = {};
+let selected = new Set(), shownIds = [], past = [], future = [];
+
+/* ---------- تطبيع الأسماء والأرقام ---------- */
+function normalizeArabicName(s, strict = false) {
+  return String(s ?? '').normalize('NFKC')
+    .replace(/[\u200B-\u200F\u202A-\u202E\u2060\uFEFF]/g, '')
+    .replace(/\u0640/g, '')
+    .replace(/[\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED]/g, '')
+    .replace(/[\u0622\u0623\u0625\u0671]/g, 'ا')
+    .replace(/\u0624/g, 'و').replace(/\u0626/g, 'ي')
+    .replace(/\u0649/g, strict ? 'ى' : 'ي').replace(/\u0629/g, strict ? 'ة' : 'ه')
+    .replace(/\u06CC/g, 'ي').replace(/\u06A9/g, 'ك')
+    .replace(/[\u0660-\u0669]/g, d => String(d.charCodeAt(0) - 0x0660))
+    .toLowerCase().replace(/\s+/g, ' ').trim();
+}
+const compactKey = (s, strict = false) => normalizeArabicName(s, strict).replace(/\s/g, '');
+
+// يوحّد الرقم إلى صيغة دولية بلا رموز: 010xxxx و+2010xxxx و002010xxxx تصبح 2010xxxx
+function normPhone(p) {
+  let s = String(p || '').replace(/[٠-٩]/g, d => String(d.charCodeAt(0) - 0x0660))
+    .replace(/[۰-۹]/g, d => String(d.charCodeAt(0) - 0x06F0)).replace(/[^\d+]/g, '');
+  if (s.startsWith('+')) s = s.slice(1);
+  else if (s.startsWith('00')) s = s.slice(2);
+  else if (s.startsWith('0')) s = COUNTRY + s.slice(1);
+  return s.length >= 7 ? s : '';
+}
+
+function levenshtein(a, b) {
+  const prev = Array.from({length: b.length + 1}, (_, j) => j);
+  for (let i = 1; i <= a.length; i++) {
+    const cur = [i];
+    for (let j = 1; j <= b.length; j++)
+      cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+    for (let j = 0; j <= b.length; j++) prev[j] = cur[j];
+  }
+  return prev[b.length];
+}
+
+/* ---------- قراءة الملفات ---------- */
+function parseCSV(text) {
+  text = text.replace(/^\uFEFF/, '');
+  const first = text.split(/\r?\n/)[0] || '';
+  const delim = [',', ';', '\t'].map(d => [d, first.split(d).length]).sort((a, b) => b[1] - a[1])[0][0];
+  const out = []; let row = [], cell = '', q = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (q) {
+      if (c === '"') { if (text[i + 1] === '"') { cell += '"'; i++; } else q = false; }
+      else cell += c;
+    } else if (c === '"') q = true;
+    else if (c === delim) { row.push(cell); cell = ''; }
+    else if (c === '\n') { row.push(cell); out.push(row); row = []; cell = ''; }
+    else if (c !== '\r') cell += c;
+  }
+  if (cell !== '' || row.length) { row.push(cell); out.push(row); }
+  return out.filter(r => r.some(x => x.trim() !== ''));
+}
+
+function decodeQP(s) {
+  return s.replace(/(?:=[0-9A-Fa-f]{2})+/g, m => {
+    try { return decodeURIComponent(m.replace(/=/g, '%')); } catch (e) { return m; }
+  });
+}
+
+function parseVCF(text) {
+  text = text.replace(/^\uFEFF/, '').replace(/\r\n?/g, '\n').replace(/\n[ \t]/g, '');
+  const raw = text.split('\n'), lines = [];
+  for (let i = 0; i < raw.length; i++) {
+    let l = raw[i];
+    if (/QUOTED-PRINTABLE/i.test(l))
+      while (l.endsWith('=') && i + 1 < raw.length) l = l.slice(0, -1) + raw[++i];
+    lines.push(l);
+  }
+  const cards = []; let cur = null;
+  for (const line of lines) {
+    const t = line.trim();
+    if (/^BEGIN:VCARD$/i.test(t)) { cur = {}; continue; }
+    if (/^END:VCARD$/i.test(t)) { if (cur) cards.push(cur); cur = null; continue; }
+    if (!cur) continue;
+    const idx = line.indexOf(':');
+    if (idx < 0) continue;
+    const left = line.slice(0, idx);
+    let value = line.slice(idx + 1);
+    if (/QUOTED-PRINTABLE/i.test(left)) value = decodeQP(value);
+    value = value.replace(/\\n/gi, '\n').replace(/\\([,;\\])/g, '$1').trim();
+    if (!value) continue;
+    const prop = left.split(';')[0].toUpperCase().replace(/^ITEM\d+\./, '');
+    (cur[prop] = cur[prop] || []).push(value);
+  }
+  const name = c => {
+    if (c.FN) return c.FN[0];
+    if (c.N) { const [f = '', g = '', a = ''] = c.N[0].split(';'); return [g, a, f].filter(Boolean).join(' ').trim(); }
+    return '';
+  };
+  const cols = [
+    {h: 'Name', f: name},
+    {h: 'Organization', f: c => (c.ORG?.[0] || '').split(';').filter(Boolean).join(' - ')},
+    {h: 'Title', f: c => c.TITLE?.[0] || ''}
+  ];
+  const maxT = Math.max(1, ...cards.map(c => (c.TEL || []).length));
+  for (let i = 0; i < maxT; i++) cols.push({h: `Phone ${i + 1}`, f: c => c.TEL?.[i] || ''});
+  const maxE = Math.max(1, ...cards.map(c => (c.EMAIL || []).length));
+  for (let i = 0; i < maxE; i++) cols.push({h: `Email ${i + 1}`, f: c => c.EMAIL?.[i] || ''});
+  cols.push(
+    {h: 'Birthday', f: c => c.BDAY?.[0] || ''},
+    {h: 'Address', f: c => (c.ADR || []).map(a => a.split(';').filter(Boolean).join(' ')).join(' | ')},
+    {h: 'Note', f: c => c.NOTE?.[0] || ''}
+  );
+  return [cols.map(c => c.h), ...cards.map(c => cols.map(col => col.f(c)))];
+}
+
+/* ---------- مساعدات البيانات ---------- */
+const nameOf = c => (c.data[nameKey] || '').trim();
+// الاسم الذي يُصدَّر: الاسم المعتمد للمجموعة إن وُجدت، وإلا الاسم الأصلي
+const displayName = c => (c.key && groups.get(c.key) ? canonical(c.key) : nameOf(c));
+// البحث بالرقم: يطابق الأرقام الأصلية والموحّدة (مثلًا 010 تجد +2010)
+const phoneMatch = (c, raw) => {
+  const d = raw.replace(/\D/g, '');
+  if (d.length < 3) return false;
+  const n = normPhone(raw);
+  return phonesOf(c).some(p => p.replace(/\D/g, '').includes(d)) || (n && c.pkeys.some(p => p.includes(n)));
+};
+const colsWhere = re => cols.filter(k => re.test(k) && k !== nameKey);
+const valuesWhere = (c, re) => colsWhere(re).map(k => c.data[k]).filter(Boolean);
+const phonesOf = c => valuesWhere(c, RE.phone);
+const emailsOf = c => valuesWhere(c, RE.email);
+const ensureCol = k => { if (!cols.includes(k)) cols.push(k); };
+const isAmbig = k => !!groups.get(k) && new Set(groups.get(k).list.map(c => c.skey)).size > 1;
+
+/* ---------- التحليل: الاسم والرقم والتشابه ---------- */
+function analyze() {
+  groups = new Map(); phoneGroups = new Map(); fuzzy = new Map(); orderPairs = new Map();
+  contacts.forEach(c => {
+    c.key = compactKey(nameOf(c));
+    c.skey = compactKey(nameOf(c), true);
+    c.pkeys = [...new Set(phonesOf(c).map(normPhone).filter(Boolean))];
+    if (c.key) {
+      if (!groups.has(c.key)) groups.set(c.key, {variants: new Map(), list: []});
+      const g = groups.get(c.key), raw = nameOf(c);
+      g.list.push(c);
+      g.variants.set(raw, (g.variants.get(raw) || 0) + 1);
+    }
+    c.pkeys.forEach(p => { if (!phoneGroups.has(p)) phoneGroups.set(p, []); phoneGroups.get(p).push(c); });
+  });
+  // ترتيب الكلمات مختلف فقط: "محمد محمود" و"محمود محمد" (اقتراح يحتاج تأكيدًا، لا تشابه إملائي)
+  const bySort = new Map();
+  groups.forEach((g, k) => {
+    const sk = normalizeArabicName([...g.variants.keys()][0]).split(' ').filter(Boolean).sort().join(' ');
+    if (!bySort.has(sk)) bySort.set(sk, []);
+    bySort.get(sk).push(k);
+  });
+  bySort.forEach(ks => ks.forEach(a => ks.forEach(b => {
+    if (a === b) return;
+    if (!orderPairs.has(a)) orderPairs.set(a, new Set());
+    orderPairs.get(a).add(b);
+  })));
+  requestFuzzy([...groups].map(([k, g]) => ({k, t: normalizeArabicName([...g.variants.keys()][0]).split(' ').filter(Boolean)})));
+  saveLocal();
+}
+
+const isDup = c => (c.key && groups.get(c.key).list.length > 1) || c.pkeys.some(p => phoneGroups.get(p).length > 1);
+function statusOf(c) {
+  if (!c.key && !c.pkeys.length) return 'empty';
+  if (isDup(c)) return 'dup';
+  if (c.key && fuzzy.has(c.key)) return 'fuzzy';
+  if (c.key && orderPairs.has(c.key)) return 'order';
+  return 'unique';
+}
+
+function canonical(k) {
+  if (choice[k] && groups.get(k).variants.has(choice[k])) return choice[k];
+  let best = '', n = -1;
+  for (const [v, c] of groups.get(k).variants) if (c > n) { best = v; n = c; }
+  return best;
+}
+
+/* ---------- التشابه الإملائي في الخلفية (Web Worker) ---------- */
+// مقارنة كلمة بكلمة: نفس عدد الكلمات، وكل كلمة متطابقة أو تختلف بحرف واحد (الكلمات 4 حروف فأكثر).
+// الكلمات المتبادلة (ترتيب مختلف) لا تُعد هنا، وتُعالج كفئة مستقلة.
+function fuzzyPairs(items) {
+  const out = [];
+  for (let i = 0; i < items.length; i++)
+    for (let j = i + 1; j < items.length; j++) {
+      const a = items[i], b = items[j];
+      if (!a.t.length || a.t.length !== b.t.length) continue;
+      if (a.t.slice().sort().join(' ') === b.t.slice().sort().join(' ')) continue;
+      let diff = 0, ok = true;
+      for (let x = 0; x < a.t.length && ok; x++) {
+        const p = a.t[x], q = b.t[x];
+        if (p === q) continue;
+        if (Math.min(p.length, q.length) <= 3 || levenshtein(p, q) > 1) ok = false;
+        else diff++;
+      }
+      if (ok && diff > 0) out.push([a.k, b.k]);
+    }
+  return out;
+}
+const FUZZY_SRC = levenshtein.toString() + '\n' + fuzzyPairs.toString() +
+  '\nself.onmessage = e => self.postMessage({id: e.data.id, out: fuzzyPairs(e.data.items)});';
+let fuzzyWorker = null, fuzzyReq = 0, fuzzyCache = {sig: '', pairs: []};
+let orderPairs = new Map();   // ترتيب كلمات مختلف فقط
+const addFuzzy = (a, b) => {
+  if (!fuzzy.has(a)) fuzzy.set(a, new Set());
+  if (!fuzzy.has(b)) fuzzy.set(b, new Set());
+  fuzzy.get(a).add(b); fuzzy.get(b).add(a);
+};
+function requestFuzzy(items) {
+  const off = items.length > 10000;
+  $('fuzzyWarn').hidden = !off;
+  if (off) return;
+  const sig = items.map(i => i.k + '|' + i.t.join(' ')).join('\u0001');
+  if (sig === fuzzyCache.sig) { fuzzyCache.pairs.forEach(([a, b]) => addFuzzy(a, b)); return; }
+  const fallback = () => {
+    const pairs = fuzzyPairs(items);
+    fuzzyCache = {sig, pairs};
+    pairs.forEach(([a, b]) => addFuzzy(a, b));
+    $('fuzzyBusy').hidden = true; render(); renderEditor();
+  };
+  if (!window.Worker) return fallback();
+  const id = ++fuzzyReq;
+  try {
+    if (!fuzzyWorker) fuzzyWorker = new Worker(URL.createObjectURL(new Blob([FUZZY_SRC], {type: 'text/javascript'})));
+    fuzzyWorker.onmessage = e => {
+      if (e.data.id !== fuzzyReq) return;
+      fuzzyCache = {sig, pairs: e.data.out};
+      e.data.out.forEach(([a, b]) => addFuzzy(a, b));
+      $('fuzzyBusy').hidden = true; render(); renderEditor();
+    };
+    fuzzyWorker.onerror = () => { fuzzyWorker = null; fallback(); };
+    $('fuzzyBusy').hidden = false;
+    fuzzyWorker.postMessage({id, items});
+  } catch (e) { fallback(); }
+}
+
+/* ---------- التراجع والإعادة والحفظ المحلي ---------- */
+const snap = () => JSON.stringify({contacts: contacts.map(c => ({id: c.id, data: c.data, meta: c.meta || {}})), cols, nameKey, choice});
+function pushHistory() { past.push(snap()); if (past.length > 50) past.shift(); future = []; updateHistoryBtns(); }
+function restore(s) {
+  const o = JSON.parse(s);
+  contacts = o.contacts; cols = o.cols; nameKey = o.nameKey; choice = o.choice || {};
+  current = null; selected.clear();
+  fillNameSel(); analyze(); render(); renderEditor();
+}
+function undo() { if (!past.length) return; future.push(snap()); restore(past.pop()); updateHistoryBtns(); }
+function redo() { if (!future.length) return; past.push(snap()); restore(future.pop()); updateHistoryBtns(); }
+function updateHistoryBtns() { $('undoBtn').disabled = !past.length; $('redoBtn').disabled = !future.length; }
+
+/* ---------- التخزين الدائم: IndexedDB ---------- */
+let dbPromise = null;
+function db() {
+  if (!dbPromise) dbPromise = new Promise((res, rej) => {
+    const r = indexedDB.open('contacts-manager', 1);
+    r.onupgradeneeded = () => { r.result.createObjectStore('state'); r.result.createObjectStore('backups', {autoIncrement: true}); };
+    r.onsuccess = () => res(r.result);
+    r.onerror = () => rej(r.error);
+  });
+  return dbPromise;
+}
+// تنفيذ عملية واحدة في معاملة؛ تُنفَّذ المعاملات بالترتيب نفسه الذي بُدئت به
+function idb(store, mode, fn) {
+  return db().then(d => new Promise((res, rej) => {
+    const tx = d.transaction(store, mode);
+    const req = fn(tx.objectStore(store));
+    tx.oncomplete = () => res(req ? req.result : undefined);
+    tx.onerror = () => rej(tx.error);
+    tx.onabort = () => rej(tx.error);
+  }));
+}
+let saveChain = Promise.resolve();
+function saveLocal() {
+  const state = currentState(); // نلتقط الحالة الآن، لا بعد أي تعديل لاحق
+  saveChain = saveChain
+    .then(() => idb('state', 'readwrite', st => st.put(state, 'current')))
+    .then(() => { $('storeWarn').hidden = true; })
+    .catch(() => { $('storeWarn').hidden = false; });
+}
+function applyLoaded(st) {
+  contacts = st.contacts; cols = st.cols || cols; nameKey = st.nameKey || nameKey;
+  COUNTRY = st.COUNTRY || COUNTRY; choice = st.choice || {};
+  if (!cols.includes(nameKey)) nameKey = cols[0];
+}
+async function loadLocal() {
+  try {
+    const st = await idb('state', 'readonly', s => s.get('current'));
+    if (st && Array.isArray(st.contacts)) { applyLoaded(st); return; }
+    // ترحيل مرة واحدة من التخزين القديم (localStorage) إن وُجد
+    const old = JSON.parse(localStorage.getItem('contacts-manager-v2') || 'null');
+    if (old && Array.isArray(old.contacts)) { applyLoaded(old); saveLocal(); }
+  } catch (e) { $('storeWarn').hidden = false; }
+}
+
+/* ---------- العرض ---------- */
+function render() {
+  fillGroupFilter();
+  const counts = {dup: 0, fuzzy: 0, order: 0, unique: 0, empty: 0};
+  contacts.forEach(c => counts[statusOf(c)]++);
+  const stat = (n, l) => `<div class="stat"><b>${n}</b><span>${l}</span></div>`;
+  $('stats').innerHTML = stat(contacts.length, 'جهة اتصال') + stat(counts.dup, 'سجل مكرر محتمل') +
+    stat(fuzzy.size, 'أسماء متشابهة') + stat(counts.order, 'ترتيب مختلف') + stat(counts.unique, 'فريد') + stat(counts.empty, 'بدون اسم');
+  $('selCount').textContent = selected.size;
+
+  const q = compactKey($('search').value), f = $('filter').value;
+  const list = contacts.filter(c => (!filterGroup || groupsOf(c).includes(filterGroup)) &&
+    (f === 'all' || f === statusOf(c)) && (!q || compactKey(Object.values(c.data).join(' ')).includes(q) || phoneMatch(c, $('search').value)));
+  list.sort(SORTS[$('sortSel').value] || SORTS.name_asc);
+  const shown = list.slice(0, 1000);
+  shownIds = list.map(c => c.id);
+  $('selAll').checked = list.length > 0 && list.every(c => selected.has(c.id));
+
+  if (!contacts.length) {
+    $('tbody').innerHTML = '<tr><td colspan="5" class="hint">ارفع ملف CSV أو VCF، أو أضف جهة اتصال جديدة</td></tr>';
+    return;
+  }
+  $('tbody').innerHTML = shown.map(c => {
+    const st = statusOf(c);
+    let canon = esc(nameOf(c));
+    if (c.key && groups.get(c.key).list.length > 1) {
+      const cur = canonical(c.key);
+      canon = `<select class="canon" data-key="${esc(c.key)}">` +
+        [...groups.get(c.key).variants.keys()].map(v =>
+          `<option value="${esc(v)}" ${v === cur ? 'selected' : ''}>${esc(v)}</option>`).join('') + '</select>';
+    }
+    return `<tr class="row ${current && current.id === c.id ? 'on' : ''}" data-id="${c.id}">
+      <td><input type="checkbox" data-sel="${c.id}" ${selected.has(c.id) ? 'checked' : ''}></td>
+      <td>${avatarOf(c)}${esc(nameOf(c))}</td>
+      <td><span class="tag ${st}">${STATUS_AR[st]}</span></td>
+      <td>${canon}</td>
+      <td dir="ltr">${esc(phonesOf(c)[0] || '')}</td></tr>`;
+  }).join('') || '<tr><td colspan="5" class="hint">لا توجد نتائج</td></tr>';
+  if (list.length > shown.length)
+    $('tbody').insertAdjacentHTML('beforeend', `<tr><td colspan="5" class="hint">يظهر ${shown.length} من ${list.length}</td></tr>`);
+}
+
+// أسباب التشابه بين جهتين
+function similarReasons(a, b) {
+  const r = [];
+  if (a.key && a.key === b.key) r.push('الاسم متطابق بعد توحيد الكتابة');
+  else if (a.key && orderPairs.get(a.key)?.has(b.key)) r.push('نفس الكلمات بترتيب مختلف، وقد يكونان شخصين مختلفين');
+  else if (a.key && fuzzy.get(a.key)?.has(b.key)) r.push('اختلاف إملائي بسيط في إحدى الكلمات');
+  if (a.key && a.key === b.key && a.skey !== b.skey) r.push('الفرق في ى/ي أو ة/ه');
+  if (a.pkeys.some(p => b.pkeys.includes(p))) r.push('رقم هاتف مشترك');
+  const ea = emailsOf(a).map(e => e.toLowerCase()), eb = emailsOf(b).map(e => e.toLowerCase());
+  if (ea.some(e => eb.includes(e))) r.push('بريد إلكتروني مشترك');
+  return r;
+}
+const similarContacts = c => contacts
+  .filter(o => o !== c)
+  .map(o => ({o, r: similarReasons(c, o)}))
+  .filter(x => x.r.length);
+
+let cmpA = null, cmpB = null;
+function openCompare(a, b) {
+  cmpA = a; cmpB = b;
+  const keys = [...new Set([...cols, ...Object.keys(a.data), ...Object.keys(b.data)])];
+  const rows = keys.map(k => {
+    const va = (a.data[k] || '').trim(), vb = (b.data[k] || '').trim();
+    if (!va && !vb) return '';
+    const st = !va || !vb ? 'موجود في أحدهما فقط' : va === vb ? 'متطابق' : 'مختلف';
+    return `<tr class="${st === 'مختلف' ? 'diff' : ''}"><th>${esc(k)}</th><td>${esc(va)}</td><td>${esc(vb)}</td><td class="hint">${st}</td></tr>`;
+  }).join('');
+  const reasons = similarReasons(a, b);
+  $('cmpBody').innerHTML = `<p>${reasons.length ? 'أسباب التشابه: ' + reasons.map(esc).join(' • ') : 'لا يوجد تشابه واضح'}</p>
+    <table><thead><tr><th>الحقل</th><th>${esc(nameOf(a))}</th><th>${esc(nameOf(b))}</th><th>الحالة</th></tr></thead>
+    <tbody>${rows}</tbody></table>`;
+  $('cmpDlg').showModal();
+}
+function mergeFromCompare() {
+  $('cmpDlg').close();
+  selected = new Set([cmpA.id, cmpB.id]);
+  render();
+  mergeSelected();
+}
+
+// عرض الجهة: الحقول الفارغة لا تظهر، والتعديل يعرض كل الحقول
+const MARKS = ['', '⭐', '🔴', '🟢', '🔵', '🟣', '💼', '🏠', '❤️', '🎂'];
+const groupsOf = c => (c.meta && c.meta.groups) || [];
+const avatarOf = c => (c.meta && c.meta.photo ? `<img class="av" src="${c.meta.photo}" alt="">` : '') +
+  (c.meta && c.meta.mark ? `<span>${esc(c.meta.mark)}</span> ` : '');
+const createdOf = c => parseInt(String(c.id).slice(0, 8), 36) || 0;
+const SORTS = {
+  name_asc: (a, b) => nameOf(a).localeCompare(nameOf(b), 'ar'),
+  name_desc: (a, b) => nameOf(b).localeCompare(nameOf(a), 'ar'),
+  newest: (a, b) => createdOf(b) - createdOf(a),
+  oldest: (a, b) => createdOf(a) - createdOf(b),
+  phone: (a, b) => (a.pkeys[0] || '~').localeCompare(b.pkeys[0] || '~'),
+  dup: (a, b) => (a.key || '~').localeCompare(b.key || '~', 'ar') || nameOf(a).localeCompare(nameOf(b), 'ar')
+};
+let filterGroup = '', staged = {};
+function fillGroupFilter() {
+  const all = [...new Set(contacts.flatMap(groupsOf))].sort((x, y) => x.localeCompare(y, 'ar'));
+  if (filterGroup && !all.includes(filterGroup)) filterGroup = '';
+  $('groupFilter').innerHTML = '<option value="">كل المجموعات</option>' +
+    all.map(g => `<option value="${esc(g)}">${esc(g)}</option>`).join('');
+  $('groupFilter').value = filterGroup;
+}
+function groupBulk(add) {
+  const name = (prompt(add ? 'اسم المجموعة للإضافة إليها:' : 'اسم المجموعة للإزالة منها:') || '').trim();
+  if (!name) return;
+  if (!selected.size) return alert('لم تحدد أي سجل');
+  pushHistory();
+  contacts.forEach(c => {
+    if (!selected.has(c.id)) return;
+    const g = new Set(groupsOf(c));
+    if (add) g.add(name); else g.delete(name);
+    c.meta = {...(c.meta || {}), groups: [...g]};
+  });
+  analyze(); render(); renderEditor();
+}
+// الصورة تُصغَّر إلى 128 بكسل لتبقى خفيفة في التخزين والنسخ
+const readDataURL = f => new Promise((res, rej) => {
+  const rd = new FileReader(); rd.onload = () => res(rd.result); rd.onerror = rej; rd.readAsDataURL(f);
+});
+const readImage = f => readDataURL(f).then(src => new Promise((res, rej) => {
+  const img = new Image();
+  img.onload = () => {
+    const k = Math.min(1, 128 / Math.max(img.width, img.height));
+    const cv = document.createElement('canvas');
+    cv.width = Math.round(img.width * k); cv.height = Math.round(img.height * k);
+    cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+    res(cv.toDataURL('image/jpeg', 0.8));
+  };
+  img.onerror = rej;
+  img.src = src;
+}));
+// في وضع التعديل تُحفظ الصورة والنغمة مع زر "حفظ"، وخارجه تُحفظ فورًا وقابلة للتراجع
+function setMeta(k, v) {
+  if (!current) return;
+  if (editMode || current.isNew) { staged[k] = v; return alert('سيُحفظ عند الضغط على "حفظ"'); }
+  pushHistory();
+  current.meta = {...(current.meta || {}), [k]: v};
+  analyze(); render(); renderEditor();
+}
+
+function renderEditor() {
+  const el = $('editor');
+  if (!current) { el.innerHTML = '<p class="hint">اختر جهة اتصال للعرض، أو اضغط "إضافة جديد".</p>'; return; }
+  const m = current.meta || {};
+  let info = '';
+  if (current.key && groups.get(current.key).list.length > 1)
+    info += `<p class="warn">يوجد ${groups.get(current.key).list.length} سجلات بنفس الاسم بعد التوحيد.</p>`;
+  if (current.pkeys.some(p => phoneGroups.get(p).length > 1))
+    info += `<p class="warn">أحد أرقام هذه الجهة مشترك مع سجل آخر.</p>`;
+  if (current.key && orderPairs.has(current.key) && !isDup(current))
+    info += '<p class="warn">ترتيب الكلمات مختلف فقط. قد يكونان شخصين مختلفين، فراجع قبل أي دمج.</p>';
+  if (current.key && isAmbig(current.key))
+    info += '<p class="warn">تنبيه: يوجد سجل بنفس الاسم بكتابة مختلفة (ى/ي أو ة/ه). تأكد قبل الدمج.</p>';
+
+  if (editMode || current.isNew) {
+    el.innerHTML = `<h3 style="margin:0 0 8px">${current.isNew ? 'جهة اتصال جديدة' : esc(nameOf(current))}</h3>${info}
+      <div class="fields">${cols.map(c =>
+        `<label>${esc(c)}<input data-col="${esc(c)}" value="${esc(current.data[c] || '')}"></label>`).join('')}
+        <label>الرمز <select data-meta="mark">${MARKS.map(x =>
+          `<option value="${x}" ${x === (m.mark || '') ? 'selected' : ''}>${x || 'بدون'}</option>`).join('')}</select></label>
+        <label>المجموعات (افصل بفاصلة) <input data-meta="groups" value="${esc(groupsOf(current).join(', '))}"></label>
+        <label>الصورة <input type="file" id="photoIn" accept="image/*"></label>
+        <label>النغمة (حتى 2 ميغابايت) <input type="file" id="ringIn" accept="audio/*"></label>
+      </div>
+      <div class="btns">
+        <button type="button" onclick="saveCurrent()">حفظ</button>
+        <button type="button" class="g" onclick="cancelEdit()">إلغاء</button>
+        <button type="button" class="g" onclick="addField()">+ حقل جديد</button>
+        <button type="button" class="g" onclick="setMeta('photo', null)">حذف الصورة</button>
+        <button type="button" class="g" onclick="setMeta('ringtone', null)">حذف النغمة</button>
+        <button type="button" class="d" onclick="deleteCurrent()">حذف</button>
+      </div>`;
+    return;
+  }
+  const rows = cols.filter(k => (current.data[k] || '').trim())
+    .map(k => `<dt>${esc(k)}</dt><dd>${esc(current.data[k])}</dd>`).join('')
+    + (groupsOf(current).length ? `<dt>المجموعات</dt><dd>${esc(groupsOf(current).join('، '))}</dd>` : '');
+  const sims = similarContacts(current);
+  el.innerHTML = `${m.photo ? `<img class="big" src="${m.photo}" alt="">` : ''}
+    <h3 style="margin:0 0 8px;text-align:center">${m.mark ? esc(m.mark) + ' ' : ''}${esc(nameOf(current))}</h3>${info}
+    <dl class="view">${rows || '<dd class="hint">لا توجد بيانات</dd>'}</dl>
+    ${m.ringtone ? `<audio controls src="${m.ringtone}" style="width:100%;margin-top:8px"></audio>` : ''}
+__SIMS__    <div class="btns"><button type="button" onclick="startEdit()">تعديل</button><button type="button" class="d" onclick="deleteCurrent()">حذف</button></div>`;
+}
+
+function fillNameSel() {
+  $('nameSel').innerHTML = cols.map(c => `<option value="${esc(c)}" ${c === nameKey ? 'selected' : ''}>${esc(c)}</option>`).join('');
+}
+
+/* ---------- الإجراءات ---------- */
+let editMode = false;
+function openEditor(id) { editMode = false; staged = {}; current = contacts.find(c => c.id === id) || null; render(); renderEditor(); }
+function addNew() { editMode = true; staged = {}; current = {id: uid(), data: {}, isNew: true}; render(); renderEditor(); }
+const startEdit = () => { editMode = true; renderEditor(); };
+function cancelEdit() { editMode = false; staged = {}; if (current && current.isNew) current = null; renderEditor(); }
+
+function addField() {
+  const name = (prompt('اسم الحقل الجديد:') || '').trim();
+  if (!name || cols.includes(name)) return;
+  cols.push(name); fillNameSel(); renderEditor(); saveLocal();
+}
+
+function saveCurrent() {
+  if (!current) return;
+  const inputs = [...document.querySelectorAll('#editor [data-col]')];
+  const vals = {};
+  inputs.forEach(i => vals[i.dataset.col] = i.value.trim());
+  if (!vals[nameKey]) { alert('الاسم مطلوب'); return; }
+  pushHistory();
+  inputs.forEach(i => { if (vals[i.dataset.col]) current.data[i.dataset.col] = vals[i.dataset.col]; else delete current.data[i.dataset.col]; });
+  const mk = document.querySelector('#editor [data-meta="mark"]');
+  const gr = document.querySelector('#editor [data-meta="groups"]');
+  current.meta = {...(current.meta || {}), ...staged, mark: mk ? mk.value : '', groups: gr ? gr.value.split(',').map(x => x.trim()).filter(Boolean) : []};
+  staged = {};
+  if (current.isNew) { contacts.push(current); current.isNew = false; }
+  editMode = false;
+  analyze(); render(); renderEditor();
+}
+
+function deleteCurrent() {
+  if (!current) return;
+  if (current.isNew) { current = null; renderEditor(); return; }
+  if (!confirm('حذف جهة الاتصال؟ يمكنك التراجع بزر "تراجع".')) return;
+  pushHistory();
+  contacts = contacts.filter(c => c.id !== current.id);
+  selected.delete(current.id); current = null;
+  analyze(); render(); renderEditor();
+}
+
+function deleteSelected() {
+  if (!selected.size) return alert('لم تحدد أي سجل');
+  if (!confirm(`حذف ${selected.size} سجلات؟ يمكنك التراجع بزر "تراجع".`)) return;
+  autoBackup('قبل الحذف');
+  pushHistory();
+  contacts = contacts.filter(c => !selected.has(c.id));
+  if (current && selected.has(current.id)) current = null;
+  selected.clear();
+  analyze(); render(); renderEditor();
+}
+
+// الدمج: يُحسب أولًا ويُعرض للمراجعة، ولا يُنفَّذ إلا بعد تأكيدك
+let pendingPlan = null;
+// يحسب نتيجة الدمج دون تعديل أي بيانات
+function buildMergePlan(list) {
+  const [primary, ...rest] = list;
+  const merged = {}, phones = [], emails = [], extra = [];
+  const seenP = new Set(), seenE = new Set();
+  list.forEach(c => Object.entries(c.data).forEach(([k, v]) => {
+    if (RE.phone.test(k) && k !== nameKey) {
+      const pk = normPhone(v) || v;
+      if (!seenP.has(pk)) { seenP.add(pk); phones.push(v); }
+    } else if (RE.email.test(k)) {
+      const ek = v.toLowerCase();
+      if (!seenE.has(ek)) { seenE.add(ek); emails.push(v); }
+    } else if (merged[k] === undefined) merged[k] = v;
+    else if (merged[k] !== v) extra.push(`${k}: ${v}`);
+  }));
+  return {primary, rest, merged, phones, emails, extra, name: merged[nameKey] || ''};
+}
+
+function mergeSelected() {
+  const list = contacts.filter(c => selected.has(c.id));
+  if (list.length < 2) return alert('حدد سجلين على الأقل');
+  const plan = buildMergePlan(list);
+  const warns = [];
+  const shared = list.some((a, i) => list.some((b, j) => j > i && a.pkeys.some(p => b.pkeys.includes(p))));
+  if (!shared) warns.push('هذه السجلات لا تشترك في أي رقم هاتف.');
+  if (!shared && list.some((a, i) => list.some((b, j) => j > i && orderPairs.get(a.key)?.has(b.key))))
+    warns.push('ترتيب الكلمات مختلف فقط: قد يكونان شخصين مختلفين (مثل الأب والابن).');
+  if (new Set(list.map(c => c.key)).size > 1) warns.push('الأسماء مختلفة في أكثر من الإملاء.');
+  else if (new Set(list.map(c => c.skey)).size > 1) warns.push('الأسماء تختلف في ى/ي أو ة/ه. تأكد أنها الشخص نفسه.');
+  $('mergeBody').innerHTML = `
+    <p>سيبقى سجل واحد باسم: <b>${esc(plan.name)}</b></p>
+    <p>سيُحذف ${plan.rest.length} سجل بعد نقل بياناته إليه:</p>
+    <ul>${list.map(c => `<li>${esc(nameOf(c))}</li>`).join('')}</ul>
+    <p>الأرقام بعد الدمج (${plan.phones.length}): <span dir="ltr">${plan.phones.map(esc).join(' ، ') || '—'}</span></p>
+    <p>البريد بعد الدمج (${plan.emails.length}): ${plan.emails.map(esc).join(' ، ') || '—'}</p>
+    ${plan.extra.length ? `<p class="warn">قيم متعارضة ستُحفظ في الملاحظات:</p><ul>${plan.extra.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : ''}
+    ${warns.map(w => `<p class="warn">⚠ ${esc(w)}</p>`).join('')}`;
+  $('mergeAck').checked = false;
+  $('mergeAck').parentElement.hidden = !warns.length;
+  $('mergeOk').disabled = warns.length > 0;
+  pendingPlan = plan;
+  $('mergeDlg').showModal();
+}
+
+function confirmMerge() {
+  const plan = pendingPlan;
+  pendingPlan = null;
+  $('mergeDlg').close();
+  if (!plan) return;
+  autoBackup('قبل الدمج');
+  pushHistory();
+  plan.phones.forEach((v, i) => { plan.merged[`Phone ${i + 1}`] = v; ensureCol(`Phone ${i + 1}`); });
+  plan.emails.forEach((v, i) => { plan.merged[`Email ${i + 1}`] = v; ensureCol(`Email ${i + 1}`); });
+  if (plan.extra.length) { plan.merged.Note = [plan.merged.Note, ...plan.extra].filter(Boolean).join(' | '); ensureCol('Note'); }
+  plan.primary.data = plan.merged;
+  contacts = contacts.filter(c => !plan.rest.includes(c));
+  selected.clear(); current = plan.primary;
+  analyze(); render(); renderEditor();
+}
+
+function findName(list) {
+  return list.find(c => RE.name.test(c)) || list.find(c => RE.nameAr.test(c)) ||
+         list.find(c => /name|اسم/i.test(c)) || list[0];
+}
+
+function importText(text, isVcf) {
+  const t = isVcf ? parseVCF(text) : parseCSV(text);
+  if (t.length < 2) { alert('لا توجد بيانات في الملف'); return; }
+  autoBackup('قبل الاستيراد');
+  pushHistory();
+  const header = t[0].map((h, j) => h.trim() || 'عمود ' + (j + 1));
+  cols = contacts.length ? [...new Set([...cols, ...header])] : header;
+  const nk = findName(header);
+  const existK = new Set(contacts.map(c => c.key).filter(Boolean));
+  const existP = new Set(contacts.flatMap(c => c.pkeys || []));
+  const rowsData = t.slice(1).map(r => {
+    const d = {};
+    header.forEach((h, j) => { const v = (r[j] || '').trim(); if (v) d[h] = v; });
+    return d;
+  });
+  const seenK = new Set(existK), seenP = new Set(existP);
+  const flags = rowsData.map(d => {
+    const kk = d[nk] ? compactKey(d[nk]) : '';
+    const pp = Object.keys(d).filter(k => RE.phone.test(k)).map(k => normPhone(d[k])).filter(Boolean);
+    const dup = (kk && seenK.has(kk)) || pp.some(p => seenP.has(p));
+    if (kk) seenK.add(kk);
+    pp.forEach(p => seenP.add(p));
+    return dup;
+  });
+  const dupN = flags.filter(Boolean).length;
+  const skipDup = dupN > 0 && confirm(`${dupN} سجل يبدو مكررًا لسجلات موجودة أو لسجل سابق في الملف نفسه.\nموافقة: تخطي المكررات.\nإلغاء: استيرادها كلها.`);
+  let added = 0;
+  rowsData.forEach((d, i) => {
+    if (skipDup && flags[i]) return;
+    contacts.push({id: uid(), data: d});
+    added++;
+  });
+  if (!cols.includes(nameKey)) nameKey = findName(cols);
+  analyze(); fillNameSel(); render(); renderEditor();
+  alert(`تم استيراد ${added} جهة اتصال`);
+}
+
+function readFile(f) {
+  const rd = new FileReader();
+  rd.onload = () => {
+    let text;
+    try { text = new TextDecoder('utf-8', {fatal: true}).decode(rd.result); }
+    catch (e) { text = new TextDecoder('windows-1256').decode(rd.result); }
+    importText(text, /\.vcf$/i.test(f.name));
+  };
+  rd.readAsArrayBuffer(f);
+}
+
+/* ---------- الأحداث ---------- */
+$('importFile').addEventListener('change', e => { if (e.target.files[0]) readFile(e.target.files[0]); e.target.value = ''; });
+$('nameSel').addEventListener('change', e => { nameKey = e.target.value; analyze(); render(); renderEditor(); });
+$('cc').addEventListener('change', e => { COUNTRY = e.target.value.replace(/\D/g, '') || '20'; e.target.value = COUNTRY; analyze(); render(); });
+$('search').addEventListener('input', render);
+$('filter').addEventListener('change', render);
+$('sortSel').addEventListener('change', render);
+$('groupFilter').addEventListener('change', e => { filterGroup = e.target.value; render(); });
+$('editor').addEventListener('change', async e => {
+  if (!current || !e.target.files || !e.target.files[0]) return;
+  if (e.target.id === 'photoIn') setMeta('photo', await readImage(e.target.files[0]));
+  if (e.target.id === 'ringIn') {
+    if (e.target.files[0].size > 2 * 1024 * 1024) return alert('النغمة أكبر من 2 ميغابايت');
+    setMeta('ringtone', await readDataURL(e.target.files[0]));
+  }
+  e.target.value = '';
+});
+$('editor').addEventListener('click', e => {
+  const b = e.target.closest('[data-cmp]');
+  if (b && current) openCompare(current, contacts.find(c => c.id === b.dataset.cmp));
+});
+$('restoreFile').addEventListener('change', e => { if (e.target.files[0]) restoreFile(e.target.files[0]); e.target.value = ''; });
+$('mergeAck').addEventListener('change', e => { $('mergeOk').disabled = !e.target.checked; });
+$('selAll').addEventListener('change', e => {
+  shownIds.forEach(id => e.target.checked ? selected.add(id) : selected.delete(id));
+  render();
+});
+
+$('tbody').addEventListener('click', e => {
+  if (e.target.closest('select, input')) return;
+  const tr = e.target.closest('tr[data-id]');
+  if (tr) openEditor(tr.dataset.id);
+});
+$('tbody').addEventListener('change', e => {
+  if (e.target.matches('input[data-sel]')) {
+    const id = e.target.dataset.sel;
+    e.target.checked ? selected.add(id) : selected.delete(id);
+    render();
+  } else if (e.target.matches('select.canon')) { pushHistory(); choice[e.target.dataset.key] = e.target.value; saveLocal(); render(); }
+});
+
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z' && !/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) {
+    e.preventDefault(); e.shiftKey ? redo() : undo();
+  }
+});
+
+// سحب الملف وإفلاته في الصفحة
+let dragDepth = 0;
+document.addEventListener('dragenter', e => { e.preventDefault(); dragDepth++; $('drop').classList.add('on'); });
+document.addEventListener('dragover', e => e.preventDefault());
+document.addEventListener('dragleave', () => { if (--dragDepth <= 0) { dragDepth = 0; $('drop').classList.remove('on'); } });
+document.addEventListener('drop', e => {
+  e.preventDefault(); dragDepth = 0; $('drop').classList.remove('on');
+  const f = e.dataTransfer.files[0];
+  if (f && /\.(csv|vcf)$/i.test(f.name)) readFile(f);
+  else if (f) alert('الملفات المدعومة: CSV أو VCF');
+});
+
+/* ---------- النسخ الاحتياطية والاستعادة ---------- */
+const BK = 'contacts-manager-backups';
+const currentState = () => ({contacts: contacts.map(c => ({id: c.id, data: c.data, meta: c.meta || {}})), cols, nameKey, COUNTRY, choice});
+function applyState(st) {
+  contacts = st.contacts; cols = st.cols; nameKey = st.nameKey; COUNTRY = st.COUNTRY || '20';
+  choice = st.choice || {}; current = null; selected.clear();
+  $('cc').value = COUNTRY; fillNameSel(); analyze(); render(); renderEditor();
+}
+const validState = st => !!st && Array.isArray(st.contacts) && Array.isArray(st.cols) && st.cols.includes(st.nameKey);
+async function autoBackup(reason) {
+  const snapState = currentState(); // لقطة فورية قبل أي تعديل
+  try {
+    await idb('backups', 'readwrite', st => st.add({at: new Date().toISOString(), reason, state: snapState}));
+    const keys = await idb('backups', 'readonly', st => st.getAllKeys());
+    if (keys.length > 5)
+      await idb('backups', 'readwrite', st => keys.slice(0, keys.length - 5).forEach(k => st.delete(k)));
+  } catch (e) { $('storeWarn').hidden = false; }
+}
+async function restoreAuto() {
+  let list = [];
+  try { list = await idb('backups', 'readonly', st => st.getAll()); } catch (e) {}
+  if (!list.length) return alert('لا توجد نسخ تلقائية بعد');
+  const b = list[list.length - 1];
+  if (!confirm(`استعادة النسخة التلقائية (${b.reason}) بتاريخ ${new Date(b.at).toLocaleString('ar')}؟\nالحالة الحالية ستبقى قابلة للتراجع.`)) return;
+  pushHistory(); applyState(b.state);
+}
+function backupFile() {
+  const doc = {app: 'contacts-manager', version: 4, savedAt: new Date().toISOString(), state: currentState()};
+  download(new Blob([JSON.stringify(doc, null, 2)], {type: 'application/json'}),
+    `contacts-backup-${new Date().toISOString().slice(0, 10)}.json`);
+}
+function restoreFile(f) {
+  const rd = new FileReader();
+  rd.onload = () => {
+    let doc;
+    try { doc = JSON.parse(rd.result); } catch (e) { return alert('الملف ليس نسخة احتياطية صالحة'); }
+    if (!doc || doc.app !== 'contacts-manager' || !validState(doc.state))
+      return alert('الملف ليس نسخة احتياطية من هذا التطبيق');
+    if (!confirm(`استعادة ${doc.state.contacts.length} جهة اتصال من نسخة ${doc.savedAt}؟\nالحالة الحالية ستبقى قابلة للتراجع.`)) return;
+    pushHistory(); applyState(doc.state);
+  };
+  rd.readAsText(f, 'utf-8');
+}
+
+const fold = line => line.match(/.{1,75}/g).join('\r\n ');
+/* ---------- التصدير ---------- */
+function download(blob, name) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = name; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+const csvQ = v => { const s = String(v ?? ''); return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
+
+// قيم موحدة لكل جهة، تُستخدم في صيغتي Google وOutlook
+function mapped(c) {
+  const p = displayName(c).split(/\s+/);
+  return {
+    first: p[0] || '', last: p.slice(1).join(' '),
+    org: valuesWhere(c, RE.org)[0] || '', title: valuesWhere(c, RE.title)[0] || '',
+    phones: [...new Set(phonesOf(c))], emails: [...new Set(emailsOf(c))],
+    note: valuesWhere(c, RE.note)[0] || ''
+  };
+}
+
+function exportCSV() {
+  if (!contacts.length) return alert('لا توجد بيانات للتصدير');
+  const fmt = $('fmt').value;
+  let head, rows;
+  if (fmt === 'ours') {
+    head = [...cols, 'مفتاح البحث', 'الحالة', 'الاسم المعتمد'];
+    rows = contacts.map(c => [...cols.map(k => c.data[k] || ''), c.key || '', STATUS_AR[statusOf(c)], c.key ? canonical(c.key) : '']);
+  } else {
+    const M = contacts.map(mapped);
+    if (fmt === 'google') {
+      const mp = Math.max(1, ...M.map(m => m.phones.length)), me = Math.max(1, ...M.map(m => m.emails.length));
+      head = ['First Name', 'Last Name', 'Organization 1 - Name', 'Organization 1 - Title'];
+      for (let i = 1; i <= mp; i++) head.push(`Phone ${i} - Type`, `Phone ${i} - Value`);
+      for (let i = 1; i <= me; i++) head.push(`E-mail ${i} - Type`, `E-mail ${i} - Value`);
+      head.push('Notes');
+      rows = M.map(m => {
+        const r = [m.first, m.last, m.org, m.title];
+        for (let i = 0; i < mp; i++) r.push(m.phones[i] ? 'Mobile' : '', m.phones[i] || '');
+        for (let i = 0; i < me; i++) r.push(m.emails[i] ? 'Other' : '', m.emails[i] || '');
+        r.push(m.note);
+        return r;
+      });
+    } else {
+      head = ['First Name', 'Last Name', 'Mobile Phone', 'Business Phone', 'E-mail Address', 'E-mail 2 Address', 'Company', 'Job Title', 'Notes'];
+      rows = M.map(m => [m.first, m.last, m.phones[0] || '', m.phones[1] || '', m.emails[0] || '', m.emails[1] || '', m.org, m.title, m.note]);
+    }
+  }
+  download(new Blob(['\uFEFF' + [head, ...rows].map(r => r.map(csvQ).join(',')).join('\r\n')],
+    {type: 'text/csv;charset=utf-8'}), `contacts-${fmt}.csv`);
+}
+
+function exportVCF() {
+  if (!contacts.length) return alert('لا توجد بيانات للتصدير');
+  const e = v => String(v).replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\n/g, '\\n');
+  const out = contacts.map(c => {
+    const L = ['BEGIN:VCARD', 'VERSION:3.0'], notes = [], name = displayName(c);
+    L.push('FN:' + e(name), 'N:;' + e(name) + ';;;');
+    cols.forEach(k => {
+      const v = c.data[k];
+      if (!v || k === nameKey) return;
+      if (RE.phone.test(k)) L.push('TEL;TYPE=CELL:' + e(v));
+      else if (RE.email.test(k)) L.push('EMAIL:' + e(v));
+      else if (RE.org.test(k)) L.push('ORG:' + e(v));
+      else if (RE.title.test(k)) L.push('TITLE:' + e(v));
+      else if (RE.bday.test(k)) L.push('BDAY:' + e(v));
+      else if (RE.addr.test(k)) L.push('ADR:;;' + e(v) + ';;;;');
+      else notes.push(`${k}: ${v}`);
+    });
+    if (notes.length) L.push('NOTE:' + e(notes.join(' | ')));
+    if (c.meta && c.meta.photo) L.push(fold('PHOTO;ENCODING=b;TYPE=JPEG:' + c.meta.photo.split(',')[1]));
+    if (groupsOf(c).length) L.push('CATEGORIES:' + groupsOf(c).map(e).join(','));
+    L.push('END:VCARD');
+    return L.join('\r\n');
+  }).join('\r\n');
+  download(new Blob([out], {type: 'text/vcard;charset=utf-8'}), 'contacts.vcf');
+}
+
+/* ---------- تشغيل أولي ---------- */
+(async () => {
+  if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
+  await loadLocal();
+  fillNameSel();
+  $('cc').value = COUNTRY;
+  analyze(); render(); renderEditor(); updateHistoryBtns();
+})();
+</script>
+</body>
+</html>
